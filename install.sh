@@ -12,8 +12,14 @@ fi
 # Some limited platform detection might be in order... though at present we're targeting the Pi
 os=$(uname)
 arq=$(uname -m)
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 if [ $os == "Linux" ]; then
+
+    # create an .xinitrc file to point to the absolute location
+    # of our redirect page
+    cp ${DIR}/scripts/.xinitrc.tpl ${DIR}/scripts/.xinitrc
+    sed -i "s,\$url,${DIR}/scripts/redirect.html,g" ${DIR}/scripts/.xinitrc
 
     # on Debian Linux distributions
     # sudo apt-get update

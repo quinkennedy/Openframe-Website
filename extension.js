@@ -15,15 +15,16 @@ module.exports = new Extension({
         'display_name': 'Website',
         'download': false,
         'start_command': function(args, tokens) {
-            // 1. clone template .xinitrc
-            var filePath = _cloneTemplate(this.xinitrcTplPath);
-            // 1. replace tokens in .xinitrc
+            // 1. clone template redirect.html
+            var filePath = _cloneTemplate(this.redirectTplPath);
+            // 1. replace tokens in redirect.html
             _replaceTokens(filePath, tokens);
             // 2. return xinit
-            return 'xinit ' + filePath;
+            return 'xinit ' + this.xinitrcPath;
         },
         'end_command': 'pkill -f X',
-        xinitrcTplPath: __dirname + '/scripts/.xinitrc.tpl'
+        redirectTplPath: __dirname + '/scripts/redirect.html.tpl',
+        xinitrcPath: __dirname + '/scripts/.xinitrc'
     },
 });
 
@@ -40,8 +41,11 @@ function _replaceTokens(filePath, tokens) {
     function replace(token, value) {
         // tokens start with a $ which needs to be escaped, oops
         var _token = '\\' + token,
+        // any '&' character needs to be escaped in the value, 
+        //  otherwise it is used as a backreference
+            _value = value.replace(/&/g, '\\&'),
             // use commas as delims so that we don't need to escape value, which might be a URL
-            cmd = 'sed -i "s,' + _token + ',' + value + ',g" ' + filePath;
+            cmd = 'sed -i "s,' + _token + ',' + _value + ',g" ' + filePath;
         execSync(cmd);
     }
 
@@ -53,7 +57,7 @@ function _replaceTokens(filePath, tokens) {
 }
 
 /**
- * Clone xinitrc
+ * Clone template
  *
  * @return {string} The string with tokens replaced.
  */
